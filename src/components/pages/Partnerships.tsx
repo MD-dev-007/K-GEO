@@ -241,7 +241,7 @@ export default function Partnerships() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center hover:shadow-xl transition-all hover:-translate-y-2">
               <div className="text-5xl font-bold text-[#1565d8] mb-2">31</div>
               <p className="text-gray-600 font-semibold">Partner Universities</p>
@@ -249,12 +249,7 @@ export default function Partnerships() {
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center hover:shadow-xl transition-all hover:-translate-y-2">
               <div className="text-5xl font-bold text-[#228be6] mb-2">20+</div>
               <p className="text-gray-600 font-semibold">Countries Represented</p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center hover:shadow-xl transition-all hover:-translate-y-2">
-              <div className="text-5xl font-bold text-[#1b2840] mb-2">∞</div>
-              <p className="text-gray-600 font-semibold">Global Opportunities</p>
-            </div>
-          </div>
+            </div>          </div>
 
           {/* Partner Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
