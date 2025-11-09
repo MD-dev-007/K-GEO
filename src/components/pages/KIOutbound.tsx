@@ -4,39 +4,100 @@ import heroImage from '../../assets/NUS 2024.jpg';
 import image1 from '../../assets/K-GEO-3 (1).JPG';
 
 export function KIOutbound() {
+  const [activeSection, setActiveSection] = useState('study-abroad');
+  const [isNavFixed, setIsNavFixed] = useState(false);
+  const [programSearch, setProgramSearch] = useState('');
+  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '', program: '', year: '', email: '', areaOfInterest: '', attachment: null as File | null,
+    destination: '', semesterOption: '', projectArea: '', immersionTheme: '', interest: ''
+  });
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('visible');
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const id = entry.target.getAttribute('id');
+          if (id) setActiveSection(id);
+        }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    }, { threshold: 0.3, rootMargin: '-100px 0px -50px 0px' });
 
     document.querySelectorAll('.scroll-animate').forEach(section => observer.observe(section));
-    return () => observer.disconnect();
+
+    const handleScroll = () => {
+      const heroHeight = document.querySelector('.hero-section')?.clientHeight || 0;
+      setIsNavFixed(window.scrollY > heroHeight - 100);
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.program-dropdown-container')) {
+        setShowProgramDropdown(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [formData, setFormData] = useState({
-    name: '', program: '', year: '', email: '', phone: '', interest: '',
-    destination: '', semesterOption: '', projectArea: '', immersionTheme: '', message: ''
-  });
-
-  const testimonials = [
-    { text: "My semester in Germany taught me to think like a global citizen.", author: "Ananya, BBA" },
-    { text: "The friendships I formed in Spain are still my global family.", author: "Rohit, CSE" },
-    { text: "In Japan, I learned design thinking in 10 days — and made friends for life.", author: "Harini, Mechanical Engg" },
-    { text: "My summer in Poland opened my eyes to European culture and innovation.", author: "Shreya, BBA" }
+  const programs = [
+    'Aeronautical Engineering', 'Automobile Engineering', 'Artificial Intelligence and Data Science',
+    'Biotechnology', 'Civil Engineering', 'Computer Science Engineering', 'Electrical and Electronics Engineering',
+    'Electronics and Communication Engineering', 'Electronics and Instrumentation Engineering', 'Fashion Technology',
+    'Information Technology', 'Textile Technology', 'Mechanical Engineering', 'Mechatronics Engineering',
+    'Computer Application', 'Management Studies', 'Business Administration', 'Business Administration (International Business)',
+    'Commerce', 'Commerce (Professional Accounting)', 'Data Science', 'Economics', 'Political Science',
+    'Psychology', 'Visual Communication', 'Tamil (CW)', 'Social Work', 'Agriculture'
   ];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+  const sections = [
+    { id: 'study-abroad', label: 'Study Abroad' },
+    { id: 'projects-internships', label: 'Projects & Internships' },
+    { id: 'short-term', label: 'Short-Term Programs' },
+    { id: 'summer-programs', label: 'Summer Programs' },
+    { id: 'counseling', label: 'Counseling' }
+  ];
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+    }
+  };
+
+  const studyAbroadTestimonials = [
+    { text: "My semester in Germany taught me to think like a global citizen.", author: "Ananya, BBA" },
+    { text: "The friendships I formed in Spain are still my global family.", author: "Rohit, CSE" }
+  ];
+
+  const shortTermTestimonials = [
+    { text: "In Japan, I learned design thinking in 10 days — and made friends for life.", author: "Harini, Mechanical Engg" },
+    { text: "Korea's exchange gave me insights into culture and technology I couldn't have imagined.", author: "Arjun, MBA" }
+  ];
+
+  const summerTestimonials = [
+    { text: "My summer in Poland opened my eyes to European culture and innovation. I made friends I still talk to daily.", author: "Shreya, BBA" },
+    { text: "Singapore's summer school gave me a real taste of global business and tech ecosystems — all in four weeks!", author: "Rahul, CSE" }
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({ ...prev, attachment: e.target.files![0] }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,12 +105,22 @@ export function KIOutbound() {
     console.log('Form submitted:', formData);
   };
 
+  const filteredPrograms = programs.filter(prog => 
+    prog.toLowerCase().includes(programSearch.toLowerCase())
+  );
+
+  const selectProgram = (prog: string) => {
+    setFormData(prev => ({ ...prev, program: prog }));
+    setProgramSearch(prog);
+    setShowProgramDropdown(false);
+  };
+
   return (
     <div className="bg-white">
       <style>{`.scroll-animate{opacity:0;transform:translateY(30px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}.scroll-animate.visible{opacity:1;transform:translateY(0)}`}</style>
 
       {/* Hero */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+      <section className="hero-section relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroImage} alt="KI Outbound" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40"></div>
@@ -65,8 +136,43 @@ export function KIOutbound() {
         </div>
       </section>
 
+      {/* Vertical Side Navigation - Only shows when hero is scrolled past */}
+      {isNavFixed && (
+        <nav className="fixed left-6 top-1/2 -translate-y-1/2 z-50 hidden lg:block">
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-[#1565d8]/20 p-3">
+            <div className="flex flex-col gap-2">
+              {sections.map((section, index) => (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={`group relative px-4 py-3 rounded-xl transition-all duration-300 ${
+                    activeSection === section.id
+                      ? 'bg-gradient-to-r from-[#1565d8] to-[#228be6] text-white shadow-lg'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-[#1565d8]'
+                  }`}
+                  title={section.label}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-bold ${activeSection === section.id ? 'text-white' : 'text-[#1565d8]'}`}>
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <div className={`h-1 w-1 rounded-full ${activeSection === section.id ? 'bg-white' : 'bg-[#1565d8]'}`} />
+                  </div>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute left-full ml-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    {section.label}
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-gray-900" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </nav>
+      )}
+
       {/* Study Abroad */}
-      <section className="py-20 px-6 bg-white scroll-animate">
+      <section id="study-abroad" className="py-20 px-6 bg-white scroll-animate">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
             <div className="space-y-6">
@@ -121,50 +227,44 @@ export function KIOutbound() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Apply for Study Abroad</h3>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="program" placeholder="Program at KCT/KCLAS/KIA" value={formData.program} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="destination" placeholder="Preferred Destination" value={formData.destination} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <select name="semesterOption" value={formData.semesterOption} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition">
-                <option value="">Select Semester/Year</option>
-                <option value="semester">Semester</option>
-                <option value="year">Year</option>
-              </select>
-              <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                  Submit Application
-                </button>
-              </div>
-            </form>
+          <div className="text-center">
+            <a href="#counseling-form" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+              Book Your Counseling Slot
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Section Divider */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="h-1 bg-gradient-to-r from-transparent via-[#1565d8] to-transparent rounded-full" />
+      </div>
+
+      {/* Student Voices - Study Abroad */}
       <section className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white scroll-animate">
         <div className="max-w-4xl mx-auto">
           <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">Student Voices</h3>
-          <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200">
-            <p className="text-xl text-gray-700 italic mb-6 text-center">"{testimonials[currentTestimonial].text}"</p>
-            <p className="text-[#1565d8] font-semibold text-center">— {testimonials[currentTestimonial].author}</p>
-            <div className="flex justify-center gap-2 mt-6">
-              {testimonials.map((_, i) => (
-                <button key={i} onClick={() => setCurrentTestimonial(i)}
-                  className={`h-2 rounded-full transition-all ${i === currentTestimonial ? 'bg-[#1565d8] w-8' : 'bg-gray-300 w-2'}`} />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {studyAbroadTestimonials.map((testimonial, i) => (
+              <div key={i} className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+                <p className="text-lg text-gray-700 italic mb-4">"{testimonial.text}"</p>
+                <p className="text-[#1565d8] font-semibold">— {testimonial.author}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* Section Divider */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="h-1 bg-gradient-to-r from-transparent via-[#1565d8] to-transparent rounded-full" />
+      </div>
+
       {/* Projects/Internship Section */}
-      <section className="py-20 px-6 bg-white scroll-animate">
+      <section id="projects-internships" className="py-20 px-6 bg-white scroll-animate">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#1565d8]/10 to-[#228be6]/10 rounded-full mb-4">
@@ -238,27 +338,24 @@ export function KIOutbound() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Apply for Project/Internship</h3>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="program" placeholder="Department/Program" value={formData.program} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="projectArea" placeholder="Project Interest Area" value={formData.projectArea} onChange={handleChange} required
-                className="md:col-span-2 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                  Submit Proposal
-                </button>
-              </div>
-            </form>
+          <div className="text-center">
+            <a href="#counseling-form" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+              Book Your Counseling Slot
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
 
+      {/* Section Divider */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="h-1 bg-gradient-to-r from-transparent via-[#228be6] to-transparent rounded-full" />
+      </div>
+
       {/* Customized Courses Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white scroll-animate">
+      <section id="short-term" className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white scroll-animate">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#1565d8]/10 to-[#228be6]/10 rounded-full mb-4">
@@ -314,32 +411,37 @@ export function KIOutbound() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Apply for Customized Course</h3>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="year" placeholder="Year & Course" value={formData.year} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <select name="immersionTheme" value={formData.immersionTheme} onChange={handleChange} required
-                className="md:col-span-2 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition">
-                <option value="">Preferred Immersion Theme</option>
-                <option value="sustainability">Sustainability</option>
-                <option value="culture">Culture</option>
-                <option value="innovation">Innovation</option>
-              </select>
-              <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                  Submit Application
-                </button>
-              </div>
-            </form>
+          {/* Student Voices - Short-Term Programs */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-10 rounded-2xl border-l-4 border-[#1565d8]">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Student Voices</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {shortTermTestimonials.map((testimonial, i) => (
+                <div key={i} className="bg-white p-6 rounded-xl shadow-md">
+                  <p className="text-base text-gray-700 italic mb-3">"{testimonial.text}"</p>
+                  <p className="text-[#1565d8] font-semibold text-sm">— {testimonial.author}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center">
+            <a href="#counseling-form" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+              Book Your Counseling Slot
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
 
+      {/* Section Divider */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="h-1 bg-gradient-to-r from-transparent via-[#1565d8] to-transparent rounded-full" />
+      </div>
+
       {/* International Summer Schools Section */}
-      <section className="py-20 px-6 bg-white scroll-animate">
+      <section id="summer-programs" className="py-20 px-6 bg-white scroll-animate">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#1565d8]/10 to-[#228be6]/10 rounded-full mb-4">
@@ -390,29 +492,37 @@ export function KIOutbound() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Expression of Interest</h3>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="program" placeholder="Program" value={formData.program} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="destination" placeholder="Preferred Destination" value={formData.destination} onChange={handleChange}
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                  Submit Interest
-                </button>
-              </div>
-            </form>
+          {/* Student Voices - Summer Programs */}
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-10 rounded-2xl border-l-4 border-[#228be6]">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Student Voices</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {summerTestimonials.map((testimonial, i) => (
+                <div key={i} className="bg-white p-6 rounded-xl shadow-md">
+                  <p className="text-base text-gray-700 italic mb-3">"{testimonial.text}"</p>
+                  <p className="text-[#228be6] font-semibold text-sm">— {testimonial.author}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center">
+            <a href="#counseling-form" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+              Book Your Counseling Slot
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
 
+      {/* Section Divider */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="h-1 bg-gradient-to-r from-transparent via-[#228be6] to-transparent rounded-full" />
+      </div>
+
       {/* Global Future Centre Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white scroll-animate">
+      <section id="counseling" className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white scroll-animate">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#1565d8]/10 to-[#228be6]/10 rounded-full mb-4">
@@ -455,26 +565,170 @@ export function KIOutbound() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Book Your Counseling Slot</h3>
+          <div id="counseling-form" className="bg-gradient-to-br from-white via-blue-50 to-white p-10 rounded-3xl shadow-2xl border-2 border-[#1565d8]/20">
+            <div className="text-center mb-8">
+              <div className="inline-block px-6 py-2 bg-gradient-to-r from-[#1565d8] to-[#228be6] rounded-full mb-4">
+                <span className="text-white font-bold text-sm tracking-wider uppercase">Get Started</span>
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">Book Your Counseling Slot</h3>
+              <p className="text-gray-600">Fill out the form below and our team will get back to you within 24 hours</p>
+            </div>
+
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <input type="text" name="year" placeholder="Course & Year" value={formData.year} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
-              <select name="interest" value={formData.interest} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition">
-                <option value="">Area of Interest</option>
-                <option value="study-abroad">Study Abroad</option>
-                <option value="internship">Internship</option>
-                <option value="projects">Projects</option>
-                <option value="immersion">Immersion</option>
-              </select>
-              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required
-                className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1565d8] focus:border-transparent transition" />
+              {/* Name */}
               <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                  Book Slot
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  placeholder="Enter your full name" 
+                  value={formData.name} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-[#1565d8] focus:border-[#1565d8] transition-all"
+                />
+              </div>
+
+              {/* Year */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Year *</label>
+                <select 
+                  name="year" 
+                  value={formData.year} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-[#1565d8] focus:border-[#1565d8] transition-all bg-white appearance-none cursor-pointer hover:border-[#1565d8]"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231565d8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                >
+                  <option value="">Select your year</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
+              </div>
+
+              {/* Program - Searchable */}
+              <div className="relative program-dropdown-container">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Program *</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    name="programSearch"
+                    placeholder="Search and select your program" 
+                    value={programSearch || formData.program}
+                    onChange={(e) => {
+                      setProgramSearch(e.target.value);
+                      setShowProgramDropdown(true);
+                    }}
+                    onFocus={() => setShowProgramDropdown(true)}
+                    required={!formData.program}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-[#1565d8] focus:border-[#1565d8] transition-all pr-10"
+                  />
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {showProgramDropdown && filteredPrograms.length > 0 && (
+                  <div className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
+                    {filteredPrograms.map((prog, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => selectProgram(prog)}
+                        className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-[#1565d8]/10 hover:to-[#228be6]/10 transition-all border-b border-gray-100 last:border-0"
+                      >
+                        <span className="text-gray-700 hover:text-[#1565d8] font-medium">{prog}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {formData.program && (
+                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-[#1565d8] to-[#228be6] text-white text-sm rounded-full">
+                    <span>{formData.program}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, program: '' }));
+                        setProgramSearch('');
+                      }}
+                      className="hover:bg-white/20 rounded-full p-0.5"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Area of Interest */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Area of Interest *</label>
+                <select 
+                  name="areaOfInterest" 
+                  value={formData.areaOfInterest} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-[#1565d8] focus:border-[#1565d8] transition-all bg-white appearance-none cursor-pointer hover:border-[#1565d8]"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231565d8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                >
+                  <option value="">Select area of interest</option>
+                  <option value="Study Abroad">📚 Study Abroad</option>
+                  <option value="Internship">💼 Internship</option>
+                  <option value="Projects">🔬 Projects</option>
+                  <option value="Immersion">🌍 Immersion</option>
+                </select>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  placeholder="your.email@example.com" 
+                  value={formData.email} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-[#1565d8] focus:border-[#1565d8] transition-all"
+                />
+              </div>
+
+              {/* Attachment */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Attachment (Optional)</label>
+                <div className="relative">
+                  <input 
+                    type="file" 
+                    name="attachment"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-[#1565d8] focus:border-[#1565d8] transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#1565d8] file:text-white hover:file:bg-[#1b4965] file:cursor-pointer"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Upload resume, transcript, or any reference document (PDF, DOC, JPG - Max 5MB)</p>
+              </div>
+
+              {/* Submit Button */}
+              <div className="md:col-span-2">
+                <button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-[#1565d8] to-[#228be6] hover:from-[#1b4965] hover:to-[#1565d8] text-white font-bold py-4 px-8 rounded-full shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-lg"
+                >
+                  Send Request
                 </button>
               </div>
             </form>

@@ -216,7 +216,7 @@ export default function Partnerships() {
               </svg>
             </a>
             <a
-              href="#contact"
+              href="mailto:global@kumaraguru.in?subject=Partnership Inquiry - Kumaraguru Institutions"
               className="inline-flex items-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-sm text-white border-2 border-white/40 rounded-full hover:bg-white/20 transition-all font-semibold"
             >
               Partner With Us
@@ -305,9 +305,6 @@ export default function Partnerships() {
                   </h3>
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <span className="text-sm text-gray-600 font-semibold">{partner.country}</span>
-                    <svg className="w-5 h-5 text-[#228be6] opacity-0 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
                   </div>
                 </div>
               </div>
