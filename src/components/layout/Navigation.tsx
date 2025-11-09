@@ -1,13 +1,28 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import imgLogo from '../../assets/af311d09d89dbde5575dc46a338b003dee158233.png';
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
   const [isMobileStudentOpen, setIsMobileStudentOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsStudentDropdownOpen(false);
+      }
+    };
+
+    if (isStudentDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isStudentDropdownOpen]);
 
   const isActive = (path: string) => {
     return location.pathname === path ? 'text-[#1565d8] font-bold' : 'text-[#1b2840]';
@@ -63,10 +78,9 @@ export function Navigation() {
               </a>
               
               {/* Student Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsStudentDropdownOpen(!isStudentDropdownOpen)}
-                  onBlur={() => setTimeout(() => setIsStudentDropdownOpen(false), 200)}
                   className="flex items-center gap-1 text-[#1b2840] hover:text-[#228be6] transition-colors"
                   style={{ fontSize: '16px', fontWeight: '500' }}
                 >

@@ -3,6 +3,7 @@ import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { ArrowRight, Globe, Users, BookOpen, Award, Calendar, MapPin, Mail, X, Send } from 'lucide-react';
 import heroImage from '../../assets/slide1.png';
 import heroImage2 from '../../assets/silde2.jpg';
+import teamImage from '../../assets/d058fd6bad7846c52f47d21d8a1bbce8947440de.png';
 import SplitText from '../animations/SplitText';
 import { CounterAnimation } from '../animations/CounterAnimation';
 import { useState, useEffect } from 'react';
@@ -363,7 +364,7 @@ export function HomePage() {
             <div className="relative w-full order-2 lg:order-1">
               <div className="relative rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
                 <ImageWithFallback
-                  src="src/assets/d058fd6bad7846c52f47d21d8a1bbce8947440de.png"
+                  src={teamImage}
                   alt="K-GEO Team"
                   className="w-full h-[280px] sm:h-[380px] lg:h-[480px] object-cover"
                 />
